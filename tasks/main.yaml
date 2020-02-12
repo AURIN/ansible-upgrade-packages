@@ -1,0 +1,24 @@
+---
+- name: RedHat systems
+  block:
+    - name: Upgrade all packages (RedHat)
+      yum:
+        name: '*'
+        state: latest
+      register: upgraded_packages
+    - name: Reboot the machine if the kernel was upgraded (RedHat)
+      reboot:
+      when: (upgraded_packages.results[0] is search("kernel")) and (reboot_after_kernel_upgrade)
+  when: upgrade_packages and (ansible_os_family == "RedHat")
+
+- name: Debian systems
+  block:
+    - name: Upgrade all packages (Debian)
+      apt:
+        name: '*'
+        state: latest
+      register: upgraded_packages
+    - name: Reboot the machine if the kernel was upgraded (Debian)
+      reboot:
+      when: (upgraded_packages.stdout is search("kernel")) and (reboot_after_kernel_upgrade)
+  when: upgrade_packages and (ansible_os_family == "Debian")
